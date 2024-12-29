@@ -1,0 +1,39 @@
+services:
+  minio:
+    container_name: minIO
+    image: minio/minio:latest
+    command: server --console-address ":9001" /data/
+    ports:
+      - "9001:9001"
+      - "9000:9000"
+    environment:
+      MINIO_ROOT_USER: dev_user
+      MINIO_ROOT_PASSWORD: dev_password
+    networks:
+      - minio-sample
+    volumes:
+      - minio-storage:/data
+
+  database:
+    container_name: database
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: dev_db
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+    ports:
+      - "5432:5432"
+    networks:
+      - minio-sample
+    volumes:
+      - database:/var/lib/postgresql/data:rw
+    depends_on:
+      - minio
+
+volumes:
+  minio-storage:
+  database:
+
+networks:
+  minio-sample:
+    driver: bridge
